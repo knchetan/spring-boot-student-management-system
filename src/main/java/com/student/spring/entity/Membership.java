@@ -1,0 +1,97 @@
+package com.student.spring.entity;
+
+import java.sql.Date;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+
+/**
+ * Represents a membership for a student.
+ * Each student has one membership and vice versa.
+ */
+
+@Entity
+@Table(name = "membership")
+public class Membership {
+
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        @Column(name = "membershipId")
+        private int membershipId;
+
+        @Column(name = "startDate", nullable = false) 
+        private Date startDate;
+
+        @Column(name = "expiryDate", nullable = false) 
+        private Date expiryDate;
+
+        @Column(name = "membershipType", nullable = false) 
+        private String membershipType;
+
+        /**
+         * One membership can be assigned to one student only.
+         * Cascade is set to ALL and fetch is EAGER to mimic lazy="false" with fetch="select"
+         */        
+        @OneToOne(mappedBy = "membership", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+        private Student student;
+
+        public Membership() {}
+
+        public Membership(Date startDate, Date expiryDate, String membershipType) {
+                this.startDate = startDate;
+                this.expiryDate = expiryDate;
+                this.membershipType = membershipType;
+        }
+
+        public int getMembershipId() {
+                return membershipId;
+        }
+
+        public void setMembershipId(int membershipId) {
+                this.membershipId = membershipId;
+        }
+
+        public Date getStartDate() {
+                return startDate;
+        }
+
+        public void setStartDate(Date startDate) {
+                this.startDate = startDate;
+        }
+
+        public Date getExpiryDate() {
+                return expiryDate;
+        }
+
+        public void setExpiryDate(Date expiryDate) {
+                this.expiryDate = expiryDate;
+        }
+
+        public String getMembershipType() {
+                return membershipType;
+        }
+
+        public void setMembershipType(String membershipType) {
+                this.membershipType = membershipType;
+        }
+
+        public Student getStudent() {
+                return student;
+        }
+
+        public void setStudent(Student student) {
+                this.student = student;
+        }
+
+        @Override
+        public String toString() {
+                return membershipType;
+        }
+}
