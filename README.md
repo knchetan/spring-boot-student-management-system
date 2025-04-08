@@ -22,7 +22,7 @@ This project is a Spring Boot–based Student Management System that demonstrate
 ## Prerequisites
 - JDK 1.8 or later
 - Maven 3.6+
-- MySQL database (ensure it is running and accessible)
+- MySQL database
 
 ## Configuration
 1. **Database Configuration:**  
