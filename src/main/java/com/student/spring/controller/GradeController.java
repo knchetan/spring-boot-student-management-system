@@ -18,6 +18,13 @@ import com.student.spring.exception.StudentException;
 import com.student.spring.service.GradeService;
 import com.student.spring.service.StudentService;
 
+/**
+ * REST Controller for managing Grade entities.
+ *
+ * Exposes endpoints to add, retrieve, update, and delete grades.
+ * The controller relies on the GradeService for business logic.
+ */
+
 @RestController
 @RequestMapping("/grades")
 public class GradeController {

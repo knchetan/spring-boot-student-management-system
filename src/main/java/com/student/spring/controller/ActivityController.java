@@ -16,6 +16,13 @@ import com.student.spring.entity.Activity;
 import com.student.spring.exception.StudentException;
 import com.student.spring.service.ActivityService;
 
+/**
+ * REST Controller for managing Activity entities.
+ *
+ * Exposes endpoints to add, retrieve, update, and delete activities.
+ * The controller relies on the ActivityService for business logic.
+ */
+
 @RestController
 @RequestMapping("/activities")
 public class ActivityController {
@@ -35,8 +42,8 @@ public class ActivityController {
      */
     @PostMapping
     public Activity addActivity(@RequestBody Activity activity) throws StudentException {
-        int id = activityService.addActivity(activity);
-        activity.setActivityId(id);
+        int activityId = activityService.addActivity(activity);
+        activity.setActivityId(activityId);
         return activity;
     }
     
@@ -56,17 +63,17 @@ public class ActivityController {
     /**
      * Updates an existing Activity.
      * 
-     * Example endpoint: PUT /activities/{id}
+     * Example endpoint: PUT /activities/{activityId}
      * The updated Activity data is provided in the request body.
      *
-     * @param id the ID of the Activity to update.
+     * @param activityId the ID of the Activity to update.
      * @param activity the Activity object with updated details.
      * @return the updated Activity object.
      * @throws StudentException if update fails.
      */
-    @PutMapping("/{id}")
-    public Activity updateActivity(@PathVariable int id, @RequestBody Activity activity) throws StudentException {
-        activity.setActivityId(id);
+    @PutMapping("/{activityId}")
+    public Activity updateActivity(@PathVariable int activityId, @RequestBody Activity activity) throws StudentException {
+        activity.setActivityId(activityId);
         activityService.updateActivity(activity);
         return activity;
     }
@@ -74,15 +81,15 @@ public class ActivityController {
     /**
      * Deletes an Activity record.
      * 
-     * Example endpoint: DELETE /activities/{id}
+     * Example endpoint: DELETE /activities/{activityId}
      *
-     * @param id the ID of the Activity to delete.
+     * @param activityId the ID of the Activity to delete.
      * @return a confirmation message.
      * @throws StudentException if deletion fails.
      */
-    @DeleteMapping("/{id}")
-    public String deleteActivity(@PathVariable int id) throws StudentException {
-        activityService.deleteActivity(id);
+    @DeleteMapping("/{activityId}")
+    public String deleteActivity(@PathVariable int activityId) throws StudentException {
+        activityService.deleteActivity(activityId);
         return "Activity deleted successfully.";
     }
 }

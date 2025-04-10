@@ -18,10 +18,9 @@ import com.student.spring.service.StudentService;
 
 /**
  * REST Controller for managing Student entities.
- * <p>
+ *
  * Exposes endpoints to register, retrieve, update, and delete students.
  * The controller relies on the StudentService for business logic.
- * </p>
  */
 @RestController
 @RequestMapping("/students")
@@ -46,17 +45,17 @@ public class StudentController {
     /**
      * Retrieves a student record by ID.
      *
-     * Example endpoint: GET /students/{id}
+     * Example endpoint: GET /students/{studentId}
      *
-     * @param id the student ID.
+     * @param studentId the student ID.
      * @return the Student object.
      * @throws StudentException if the student is not found.
      */
-    @GetMapping("/{id}")
-    public Student getStudentById(@PathVariable("id") int id) throws StudentException {
-        Student student = studentService.getStudentById(id);
+    @GetMapping("/{studentId}")
+    public Student getStudentById(@PathVariable("studentId") int studentId) throws StudentException {
+        Student student = studentService.getStudentById(studentId);
         if (student == null) {
-            throw new StudentException("Student not found with ID: " + id);
+            throw new StudentException("Student not found with ID: " + studentId);
         }
         return student;
     }
@@ -82,20 +81,20 @@ public class StudentController {
     /**
      * Updates an existing student's details.
      *
-     * Example endpoint: PUT /students/{id}
+     * Example endpoint: PUT /students/{studentId}
      * The request body should contain updated student details in JSON format.
      *
-     * @param id the student ID.
+     * @param studentId the student ID.
      * @param student the Student object containing updated details.
      * @return the updated Student object.
      * @throws StudentException if update fails.
      */
-    @PutMapping("/{id}")
-    public Student updateStudent(@PathVariable("id") int id, @RequestBody Student student) throws StudentException {
-        if (!studentService.isStudentExists(id)) {
-            throw new StudentException("Student not found with ID: " + id);
+    @PutMapping("/{studentId}")
+    public Student updateStudent(@PathVariable("studentId") int studentId, @RequestBody Student student) throws StudentException {
+        if (!studentService.isStudentExists(studentId)) {
+            throw new StudentException("Student not found with ID: " + studentId);
         }
-        student.setStudentId(id);
+        student.setStudentId(studentId);
         studentService.updateStudent(student);
         return student;
     }
@@ -103,18 +102,18 @@ public class StudentController {
     /**
      * Deletes a student record by ID.
      * 
-     * Example endpoint: DELETE /students/{id}
+     * Example endpoint: DELETE /students/{studentId}
      *
-     * @param id the student ID.
+     * @param studentId the student ID.
      * @return a success message.
      * @throws StudentException if deletion fails.
      */
-    @DeleteMapping("/{id}")
-    public String deleteStudent(@PathVariable("id") int id) throws StudentException {
-        if (!studentService.isStudentExists(id)) {
-            throw new StudentException("Student not found with ID: " + id);
+    @DeleteMapping("/{studentId}")
+    public String deleteStudent(@PathVariable("studentId") int studentId) throws StudentException {
+        if (!studentService.isStudentExists(studentId)) {
+            throw new StudentException("Student not found with ID: " + studentId);
         }
-        studentService.deleteStudent(id);
+        studentService.deleteStudent(studentId);
         return "Student deleted successfully";
     }
 }

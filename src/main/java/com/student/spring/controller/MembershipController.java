@@ -20,6 +20,13 @@ import com.student.spring.entity.Membership;
 import com.student.spring.exception.StudentException;
 import com.student.spring.service.MembershipService;
 
+/**
+ * REST Controller for managing Membership entities.
+ *
+ * Exposes endpoints to add, retrieve, update, and delete memberships.
+ * The controller relies on the MembershipService for business logic.
+ */
+
 @RestController
 @RequestMapping("/memberships")
 public class MembershipController {
@@ -94,17 +101,17 @@ public class MembershipController {
     /**
      * Retrieves a membership by its ID.
      * 
-     * Example endpoint: GET /memberships/{id}
+     * Example endpoint: GET /memberships/{membershipId}
      *
-     * @param id the membership ID
+     * @param membershipId the membership ID
      * @return the corresponding Membership entity
      * @throws StudentException if retrieval fails.
      */
-    @GetMapping("/{id}")
-    public Membership getMembershipById(@PathVariable("id") int id) throws StudentException {
-        Membership membership = membershipService.getMembershipByMembershipId(id);
+    @GetMapping("/{membershipId}")
+    public Membership getMembershipById(@PathVariable("membershipId") int membershipId) throws StudentException {
+        Membership membership = membershipService.getMembershipByMembershipId(membershipId);
         if (membership == null) {
-            throw new StudentException("Membership not found with ID: " + id);
+            throw new StudentException("Membership not found with ID: " + membershipId);
         }
         return membership;
     }
@@ -114,38 +121,38 @@ public class MembershipController {
      *
      * Only the membershipType can be updated; start and expiry dates remain unchanged.
      * 
-     * Example endpoint: PUT /memberships/{id}
+     * Example endpoint: PUT /memberships/{membershipId}
      *
-     * @param id the membership ID
+     * @param membershipId the membership ID
      * @param membership the Membership entity with updated details (membershipType)
      * @return the updated Membership entity
      * @throws StudentException if update fails.
      */
-    @PutMapping("/{id}")
-    public Membership updateMembership(@PathVariable("id") int id, @RequestBody Membership membership) throws StudentException {
-        Membership existing = membershipService.getMembershipByMembershipId(id);
+    @PutMapping("/{membershipId}")
+    public Membership updateMembership(@PathVariable("membershipId") int membershipId, @RequestBody Membership membership) throws StudentException {
+        Membership existing = membershipService.getMembershipByMembershipId(membershipId);
         if (existing == null) {
-            throw new StudentException("Membership not found with ID: " + id);
+            throw new StudentException("Membership not found with ID: " + membershipId);
         }
         existing.setMembershipType(membership.getMembershipType());
         membershipService.updateMembership(existing);
-        logger.info("Membership updated successfully for ID: {}", id);
+        logger.info("Membership updated successfully for ID: {}", membershipId);
         return existing;
     }
     
     /**
      * Deletes a membership by its ID.
      * 
-     * Example endpoint: DELETE /memberships/{id}
+     * Example endpoint: DELETE /memberships/{membershipId}
      *
-     * @param id the membership ID
+     * @param membershipId the membership ID
      * @return a confirmation message.
      * @throws StudentException if deletion fails.
      */
-    @DeleteMapping("/{id}")
-    public String deleteMembership(@PathVariable("id") int id) throws StudentException {
-        membershipService.deleteMembership(id);
-        logger.info("Membership deleted successfully for ID: {}", id);
+    @DeleteMapping("/{membershipId}")
+    public String deleteMembership(@PathVariable("membershipId") int membershipId) throws StudentException {
+        membershipService.deleteMembership(membershipId);
+        logger.info("Membership deleted successfully for ID: {}", membershipId);
         return "Membership deleted successfully";
     }
 }
