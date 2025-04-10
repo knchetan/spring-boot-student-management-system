@@ -11,6 +11,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Represents a Grade entity.
@@ -20,6 +24,11 @@ import jakarta.persistence.Table;
  * This is the inverse side of the many-to-one relationship defined in the Student entity.
  * </p>
  */
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "grade")
 public class Grade {
@@ -41,48 +50,4 @@ public class Grade {
          */
         @OneToMany(mappedBy = "grade", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
         private Set<Student> students;
-        
-        public Grade() {}
-
-        public Grade(String grade, int standard) {
-                this.grade = grade;
-                this.standard = standard;
-        }        
-
-        public int getGradeId() {
-                return gradeId;
-        }
-
-        public void setGradeId(int gradeId) {
-                this.gradeId = gradeId;
-        }
-
-        public String getGrade() {
-                return grade;
-        }
-
-        public void setGrade(String grade) {
-                this.grade = grade;
-        }
-
-        public int getStandard() {
-                return standard;
-        }
-
-        public void setStandard(int standard) {
-                this.standard = standard;
-        }
-
-        public Set<Student> getStudents() {
-                return students;
-        }
-
-        public void setStudents(Set<Student> students) {
-                this.students = students;
-        }
-
-        @Override
-        public String toString() {
-                return grade + "\tStandard: " + standard;
-        }
 }

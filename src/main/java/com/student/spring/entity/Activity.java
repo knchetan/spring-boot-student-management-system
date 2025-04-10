@@ -13,14 +13,22 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Represents an Activity entity.
- * <p>
+ *
  * Each Activity has a unique ID, a name, and a type (e.g. Indoor or Outdoor).
  * It also has a many-to-many relationship with Student entities, with the join table "student_activity".
- * </p>
  */
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor 
 @Entity
 @Table(name = "activity")
 public class Activity {
@@ -46,48 +54,4 @@ public class Activity {
                 inverseJoinColumns = @JoinColumn(name = "student_id")
         )
         private Set<Student> students;
-
-        public Activity() {}
-
-        public Activity(String activityName, String activityType) {
-                this.activityName = activityName;
-                this.activityType = activityType;
-        }
-
-        public int getActivityId() {
-                return activityId;
-        }
-
-        public void setActivityId(int activityId) {
-                this.activityId = activityId;
-        }
-
-        public String getActivityName() {
-                return activityName;
-        }
-
-        public void setActivityName(String activityName) {
-                this.activityName = activityName;
-        }
-
-        public String getActivityType() {
-                return activityType;
-        }
-
-        public void setActivityType(String activityType) {
-                this.activityType = activityType;
-        }
-
-        public Set<Student> getStudents () {
-                return students;
-        }
-
-        public void setStudents(Set<Student> students) {
-                this.students = students;
-        }
-
-        @Override
-        public String toString() {
-                return "Activity Name: " + activityName + ",\tActivity Type: " + activityType;
-        }
 }
