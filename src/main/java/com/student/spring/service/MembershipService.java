@@ -33,6 +33,16 @@ public interface MembershipService {
         Membership getMembershipByStudentId(int studentId) throws StudentException;
 
         /**
+         *  Retrives the Membership associated with it's ID.
+         * 
+         *  @param id the membership ID.
+         *  @return Membership object.
+         *  @throws StudentException if retrieval fails.
+         */
+
+        Membership getMembershipByMembershipId(int id) throws StudentException;
+
+        /**
          * Retrieves all membership records.
          * 
          * @return a list of all Membership objects.

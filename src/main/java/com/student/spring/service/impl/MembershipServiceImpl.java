@@ -43,6 +43,18 @@ public class MembershipServiceImpl implements MembershipService {
             throw new StudentException("Error retrieving membership for student ID " + studentId + ": " + se.getMessage());
         }
     }
+
+    @Override
+    public Membership getMembershipByMembershipId(int membershipId) throws StudentException {
+        try {
+            Membership membership = membershipRepository.findById(membershipId)
+                    .orElseThrow(() -> new StudentException("Membership not found for ID: " + membershipId));
+            return membership;
+        } catch (Exception se) {
+            logger.error("Error retrieving membership for membership ID: {}" + membershipId + se);
+            throw new StudentException("Error retrieving membership for membership ID " + membershipId + ": " + se.getMessage());
+        }
+    }
     
     @Override
     public List<Membership> getAllMemberships() throws StudentException {
