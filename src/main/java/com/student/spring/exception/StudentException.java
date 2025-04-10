@@ -1,11 +1,12 @@
 package com.student.spring.exception;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 /**
- *    This class is an exception handler for the repository layer.
- *    It provides a static method to handle exceptions.
- *
- *    @return void.
+ * Exception class for handling student-related errors.
  */
+@ResponseStatus(value = HttpStatus.BAD_REQUEST)
 public class StudentException extends Exception {
 
     private int id;
