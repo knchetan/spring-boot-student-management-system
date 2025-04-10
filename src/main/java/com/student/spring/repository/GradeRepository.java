@@ -16,3 +16,4 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
 
     List<Grade> findByStudentsStudentId(int studentId);
 }
+    
