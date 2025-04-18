@@ -2,7 +2,7 @@ package com.student.spring.service;
 
 import java.util.List;
 
-import com.student.spring.entity.Activity;
+import com.student.spring.dto.ActivityDTO;
 import com.student.spring.exception.StudentException;
 
 /**
@@ -16,7 +16,7 @@ public interface ActivityService {
      * @return the generated activity ID.
      * @throws StudentException if registration fails.
      */
-    int addActivity(Activity activity) throws StudentException;
+    int addActivity(ActivityDTO activityDTO) throws StudentException;
 
     /**
      * Retrieves the list of Activity objects associated with a given student ID.
@@ -25,7 +25,7 @@ public interface ActivityService {
      * @return a List of Activity objects.
      * @throws StudentException if an error occurs during retrieval.
      */
-    List<Activity> getActivitiesByStudentId(int studentId) throws StudentException;
+    List<ActivityDTO> getActivitiesByStudentId(int studentId) throws StudentException;
 
     /**
      * Retrieves all activity records.
@@ -33,7 +33,7 @@ public interface ActivityService {
      * @return a list of Activity objects.
      * @throws StudentException if retrieval fails.
      */
-    List<Activity> getAllActivities() throws StudentException;
+    List<ActivityDTO> getAllActivities() throws StudentException;
 
     /**
      * Updates an existing activity record.
@@ -41,7 +41,7 @@ public interface ActivityService {
      * @param activity the Activity object with updated details.
      * @throws StudentException if an error occurs during update.
      */
-    void updateActivity(Activity activity) throws StudentException;
+    void updateActivity(ActivityDTO activityDTO) throws StudentException;
 
     /**
      * Deletes an activity record based on the activity ID.

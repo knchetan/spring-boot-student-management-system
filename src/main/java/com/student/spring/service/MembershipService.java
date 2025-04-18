@@ -2,7 +2,7 @@ package com.student.spring.service;
 
 import java.util.List;
 
-import com.student.spring.entity.Membership;
+import com.student.spring.dto.MembershipDTO;
 import com.student.spring.exception.StudentException;
 
 /**
@@ -20,7 +20,7 @@ public interface MembershipService {
          * @throws StudentException if registration fails.
          */
 
-        int addMembership(Membership membership) throws StudentException;
+        int addMembership(MembershipDTO membershipDTO) throws StudentException;
 
         /**
          * Retrieves the Membership associated with a student.
@@ -30,7 +30,7 @@ public interface MembershipService {
          * @throws StudentException if retrieval fails.
          */
 
-        Membership getMembershipByStudentId(int studentId) throws StudentException;
+        MembershipDTO getMembershipByStudentId(int studentId) throws StudentException;
 
         /**
          *  Retrives the Membership associated with it's ID.
@@ -40,7 +40,7 @@ public interface MembershipService {
          *  @throws StudentException if retrieval fails.
          */
 
-        Membership getMembershipByMembershipId(int id) throws StudentException;
+        MembershipDTO getMembershipById(int id) throws StudentException;
 
         /**
          * Retrieves all membership records.
@@ -49,7 +49,7 @@ public interface MembershipService {
          * @throws StudentException if retrieval fails.
          */
 
-        List<Membership> getAllMemberships() throws StudentException;        
+        List<MembershipDTO> getAllMemberships() throws StudentException;        
 
         /**
          * Updates an existing membership record.
@@ -58,7 +58,7 @@ public interface MembershipService {
          * @throws StudentException if an error occurs during update.
          */                
 
-        void updateMembership(Membership membership) throws StudentException;
+        void updateMembership(MembershipDTO membershipDTO) throws StudentException;
 
         /**
          * Deletes a membership record based on the membership ID.

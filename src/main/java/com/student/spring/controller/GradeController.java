@@ -2,123 +2,104 @@ package com.student.spring.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 
-import com.student.spring.entity.Grade;
+import com.student.spring.dto.GradeDTO;
 import com.student.spring.exception.StudentException;
 import com.student.spring.service.GradeService;
 import com.student.spring.service.StudentService;
 
-/**
- * REST Controller for managing Grade entities.
- *
- * Exposes endpoints to add, retrieve, update, and delete grades.
- * The controller relies on the GradeService for business logic.
- */
+import jakarta.validation.Valid;
 
+/**
+ * REST Controller for managing Grade entities using DTOs.
+ */
 @RestController
 @RequestMapping("/grades")
 public class GradeController {
 
-    private final GradeService gradeService;
-    private final StudentService studentService;
-    
+    private static final Logger logger = LoggerFactory.getLogger(GradeController.class);
+
     @Autowired
-    public GradeController(GradeService gradeService, StudentService studentService) {
-        this.gradeService = gradeService;
-        this.studentService = studentService;
-    }
-    
-    /**
-     * Creates a new grade (with standard) and assigns it to a student.
-     * The studentId is passed as a request parameter.
-     *
-     * Example endpoint: POST /grades?studentId=1
-     *
-     * @param grade the Grade object in JSON (grade letter and standard)
-     * @param studentId the ID of the student to assign this grade to
-     * @return the created Grade object
-     * @throws StudentException if the student does not exist or registration fails
-     */
+    private GradeService gradeService;
+
+    @Autowired
+    private StudentService studentService;
+
+    // POST: Add Grade
     @PostMapping
-    public Grade addGradeAndStandard(@RequestBody Grade grade, @RequestParam int studentId) throws StudentException {
-        if (!studentService.isStudentExists(studentId)) {
-            throw new StudentException("Student not found with ID: " + studentId);
+    public ResponseEntity<?> addGrade(@RequestBody @Valid GradeDTO gradeDTO, @RequestParam int studentId) {
+        try {
+            if (!studentService.isStudentExists(studentId)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Student not found with ID: " + studentId);
+            }
+            int gradeId = gradeService.addGrade(gradeDTO);
+            gradeDTO.setGradeId(gradeId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(gradeDTO);
+        } catch (StudentException se) {
+            logger.error("Error adding grade", se);
+            return ResponseEntity.badRequest().body("Error: " + se.getMessage());
         }
-        // This method associates the grade with the student; business logic is handled in the service layer.
-        int gradeId = gradeService.addGradeForStudent(grade, studentId);
-        grade.setGradeId(gradeId);
-        return grade;
     }
-    
-    /**
-     * Retrieves all grade records.
-     *
-     * Example endpoint: GET /grades
-     *
-     * @return a list of Grade objects
-     * @throws StudentException if retrieval fails
-     */
+
+    // GET: All Grades
     @GetMapping
-    public List<Grade> getAllGrades() throws StudentException {
-        return gradeService.getAllGrades();
+    public ResponseEntity<?> getAllGrades() {
+        try {
+            List<GradeDTO> grades = gradeService.getAllGrades();
+            return ResponseEntity.ok(grades);
+        } catch (StudentException se) {
+            logger.error("Error retrieving grades", se);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error: " + se.getMessage());
+        }
     }
-    
-    /**
-     * Retrieves all grades associated with a specific student.
-     *
-     * Example endpoint: GET /grades/byStudent/1
-     *
-     * @param studentId the student's ID
-     * @return a list of Grade objects associated with that student
-     * @throws StudentException if retrieval fails
-     */
+
+    // GET: Grades by student
     @GetMapping("/byStudent/{studentId}")
-    public List<Grade> getGradesByStudentId(@PathVariable int studentId) throws StudentException {
-        return gradeService.getGradesByStudentId(studentId);
+    public ResponseEntity<?> getGradesByStudentId(@PathVariable int studentId) {
+        try {
+            List<GradeDTO> grades = gradeService.getGradesByStudentId(studentId);
+            return ResponseEntity.ok(grades);
+        } catch (StudentException se) {
+            logger.error("Error retrieving grades for student {}", studentId, se);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Error: " + se.getMessage());
+        }
     }
-    
-    /**
-     * Updates an existing grade record.
-     *
-     * Example endpoint: PUT /grades/{gradeId}
-     *
-     * @param gradeId the ID of the grade to update
-     * @param grade the Grade object in JSON with updated details
-     * @return the updated Grade object
-     * @throws StudentException if the update fails
-     */
+
+    // PUT: Update grade
     @PutMapping("/{gradeId}")
-    public Grade updateGrade(@PathVariable int gradeId, @RequestBody Grade grade) throws StudentException {
-        grade.setGradeId(gradeId);
-        gradeService.updateGrade(grade);
-        return grade;
+    public ResponseEntity<?> updateGrade(@PathVariable int gradeId, @RequestBody @Valid GradeDTO gradeDTO) {
+        try {
+            gradeDTO.setGradeId(gradeId);
+            gradeService.updateGrade(gradeDTO);
+            return ResponseEntity.ok(gradeDTO);
+        } catch (StudentException se) {
+            logger.error("Error updating grade", se);
+            return ResponseEntity.badRequest().body("Error: " + se.getMessage());
+        }
     }
-    
-    /**
-     * Deletes a grade record by its ID.
-     *
-     * Example endpoint: DELETE /grades/{gradeId}
-     *
-     * @param gradeId the ID of the grade to delete
-     * @return a success message if deletion is successful
-     * @throws StudentException if deletion fails
-     */
+
+    // DELETE: Delete grade
     @DeleteMapping("/{gradeId}")
-    public String deleteGrade(@PathVariable int gradeId) throws StudentException {
-        gradeService.deleteGrade(gradeId);
-        return "Grade deleted successfully";
+    public ResponseEntity<?> deleteGrade(@PathVariable int gradeId) {
+        try {
+            gradeService.deleteGrade(gradeId);
+            return ResponseEntity.ok("Grade deleted successfully");
+        } catch (StudentException se) {
+            logger.error("Error deleting grade", se);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Error: " + se.getMessage());
+        }
     }
 }
+
 
 
 
@@ -169,7 +150,7 @@ public class GradeController {
 // /**
 //  *      The GradeController class manages the console-based menu for grade operations.
 //  *
-//  *      A grade record represents a combination of a grade letter (e.g., A+, A, B+, etc.),
+//  *      A grade record represents a combination of a grade letter (se.g., A+, A, B+, etc.),
 //  *      and each student is associated with one such grade record.
 //  *
 //  *      The controller interacts with the GradeService to perform CRUD operations and with the StudentService to validate
@@ -204,7 +185,7 @@ public class GradeController {
 //                         int choice = InputUtil.getInteger();
 //                         switch (choice) {
 //                                 case 1:
-//                                         addGradeAndStandard();
+//                                         addGrade();
 //                                         break;
 //                                 case 2:
 //                                         updateGrade();
@@ -230,11 +211,11 @@ public class GradeController {
 //          * Otherwise, it calls the service to add the grade for the specified student.
 //          * </p>
 //          */
-//         public void addGradeAndStandard() {
+//         public void addGrade() {
 //                 try {
 //                         logger.info("\nEnter your grade - A+, A, B+, B, C+, C, D+, D, E, F: ");
 //                         String gradeInput = InputUtil.getString().trim().toUpperCase();
-//                         logger.info("Enter the standard (e.g., 1,2,3,...): ");
+//                         logger.info("Enter the standard (se.g., 1,2,3,...): ");
 //                         int standardInput = InputUtil.getInteger();
                         
 //                         logger.info("Enter the student ID to assign the grade: ");

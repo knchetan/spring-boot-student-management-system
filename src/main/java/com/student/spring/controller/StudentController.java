@@ -2,121 +2,126 @@ package com.student.spring.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 
+import com.student.spring.dto.StudentDTO;
 import com.student.spring.entity.Student;
 import com.student.spring.exception.StudentException;
+import com.student.spring.mapper.StudentMapper;
 import com.student.spring.service.StudentService;
 
-/**
- * REST Controller for managing Student entities.
- *
- * Exposes endpoints to register, retrieve, update, and delete students.
- * The controller relies on the StudentService for business logic.
- */
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/students")
 public class StudentController {
 
+    private static final Logger logger = LoggerFactory.getLogger(StudentController.class);
+
     @Autowired
     private StudentService studentService;
 
-    /**
-     * Retrieves all student records.
-     *
-     * Example endpoint: GET /students
-     *
-     * @return a list of Student objects
-     * @throws StudentException if retrieval fails.
-     */
+    // GET: Get all students
     @GetMapping
-    public List<Student> getAllStudents() throws StudentException {
-        return studentService.getAllStudents();
+    public ResponseEntity<?> getAllStudents() {
+        logger.info("GET /students - Fetching all students");
+        try {
+            List<StudentDTO> studentDTOs = studentService.getAllStudents();
+            logger.info("Successfully fetched {} student(s)", studentDTOs.size());
+            return ResponseEntity.ok(studentDTOs);
+        } catch (StudentException se) {
+            logger.error("Error fetching all students", se);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving students: " + se.getMessage());
+        }
     }
-    
-    /**
-     * Retrieves a student record by ID.
-     *
-     * Example endpoint: GET /students/{studentId}
-     *
-     * @param studentId the student ID.
-     * @return the Student object.
-     * @throws StudentException if the student is not found.
-     */
+
+    // GET: Get student by ID
     @GetMapping("/{studentId}")
-    public Student getStudentById(@PathVariable("studentId") int studentId) throws StudentException {
-        Student student = studentService.getStudentById(studentId);
-        if (student == null) {
-            throw new StudentException("Student not found with ID: " + studentId);
+    public ResponseEntity<?> getStudentById(@PathVariable("studentId") int studentId) {
+        logger.info("GET /students/{} - Fetching student by ID", studentId);
+        try {
+            StudentDTO studentDTO = studentService.getStudentById(studentId);
+            if (studentDTO == null) {
+                logger.warn("Student not found with ID: {}", studentId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Student not found with ID: " + studentId);
+            }
+            logger.info("Student with ID {} found", studentId);
+            return ResponseEntity.ok(studentDTO);
+        } catch (StudentException se) {
+            logger.error("Error retrieving student with ID: {}", studentId, se);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving student: " + se.getMessage());
         }
-        return student;
     }
-    
-    /**
-     * Registers a new student.
-     * 
-     * Example endpoint: POST /students
-     * The request body should contain the student details in JSON format.
-     * The membership and activity associations should be included as needed.
-     *
-     * @param student the Student object to register.
-     * @return the registered Student object with generated ID.
-     * @throws StudentException if registration fails.
-     */
+
+    // POST: Register new student
     @PostMapping
-    public Student registerStudent(@RequestBody Student student) throws StudentException {
-        int studentId = studentService.registerStudent(student);
-        student.setStudentId(studentId);
-        return student;
+    public ResponseEntity<?> registerStudent(@RequestBody @Valid StudentDTO studentDTO) {
+        logger.info("POST /students - Registering new student");
+        try {
+            Student student = StudentMapper.toEntity(studentDTO);
+            int studentId = studentService.registerStudent(StudentMapper.toDTO(student));
+            student.setStudentId(studentId);
+            logger.info("Student registered successfully with ID: {}", studentId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(StudentMapper.toDTO(student));
+        } catch (StudentException se) {
+            logger.error("Error registering student", se);
+            return ResponseEntity.badRequest().body("Error registering student: " + se.getMessage());
+        }
     }
-    
-    /**
-     * Updates an existing student's details.
-     *
-     * Example endpoint: PUT /students/{studentId}
-     * The request body should contain updated student details in JSON format.
-     *
-     * @param studentId the student ID.
-     * @param student the Student object containing updated details.
-     * @return the updated Student object.
-     * @throws StudentException if update fails.
-     */
+
+    // PUT: Update student
     @PutMapping("/{studentId}")
-    public Student updateStudent(@PathVariable("studentId") int studentId, @RequestBody Student student) throws StudentException {
-        if (!studentService.isStudentExists(studentId)) {
-            throw new StudentException("Student not found with ID: " + studentId);
+    public ResponseEntity<?> updateStudent(@PathVariable("studentId") int studentId,
+                                           @RequestBody @Valid StudentDTO studentDTO) {
+        logger.info("PUT /students/{} - Updating student", studentId);
+        try {
+            if (!studentService.isStudentExists(studentId)) {
+                logger.warn("Update failed - Student not found with ID: {}", studentId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Student not found with ID: " + studentId);
+            }
+
+            Student student = StudentMapper.toEntity(studentDTO);
+            student.setStudentId(studentId);
+            studentService.updateStudent(StudentMapper.toDTO(student));
+            logger.info("Student updated successfully with ID: {}", studentId);
+            return ResponseEntity.ok(StudentMapper.toDTO(student));
+        } catch (StudentException se) {
+            logger.error("Error updating student with ID: {}", studentId, se);
+            return ResponseEntity.badRequest().body("Error updating student: " + se.getMessage());
         }
-        student.setStudentId(studentId);
-        studentService.updateStudent(student);
-        return student;
     }
-    
-    /**
-     * Deletes a student record by ID.
-     * 
-     * Example endpoint: DELETE /students/{studentId}
-     *
-     * @param studentId the student ID.
-     * @return a success message.
-     * @throws StudentException if deletion fails.
-     */
+
+    // DELETE: Delete student
     @DeleteMapping("/{studentId}")
-    public String deleteStudent(@PathVariable("studentId") int studentId) throws StudentException {
-        if (!studentService.isStudentExists(studentId)) {
-            throw new StudentException("Student not found with ID: " + studentId);
+    public ResponseEntity<?> deleteStudent(@PathVariable("studentId") int studentId) {
+        logger.info("DELETE /students/{} - Deleting student", studentId);
+        try {
+            if (!studentService.isStudentExists(studentId)) {
+                logger.warn("Delete failed - Student not found with ID: {}", studentId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Student not found with ID: " + studentId);
+            }
+            studentService.deleteStudent(studentId);
+            logger.info("Student deleted successfully with ID: {}", studentId);
+            return ResponseEntity.ok("Student deleted successfully");
+        } catch (StudentException se) {
+            logger.error("Error deleting student with ID: {}", studentId, se);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error deleting student: " + se.getMessage());
         }
-        studentService.deleteStudent(studentId);
-        return "Student deleted successfully";
     }
 }
+
+
+
 
 
 

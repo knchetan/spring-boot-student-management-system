@@ -7,155 +7,124 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 
-import com.student.spring.entity.Membership;
+import com.student.spring.dto.MembershipDTO;
 import com.student.spring.exception.StudentException;
 import com.student.spring.service.MembershipService;
 
-/**
- * REST Controller for managing Membership entities.
- *
- * Exposes endpoints to add, retrieve, update, and delete memberships.
- * The controller relies on the MembershipService for business logic.
- */
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/memberships")
 public class MembershipController {
 
     private static final Logger logger = LoggerFactory.getLogger(MembershipController.class);
-    
+
     @Autowired
     private MembershipService membershipService;
-    
-    /**
-     * Creates a new membership.
-     *
-     * The membership start date is automatically set to the current date.
-     * The expiry date is determined based on the membership type:
-     *   - Standard: current date + 3 months
-     *   - Premium: current date + 6 months
-     *   - Platinum: current date + 12 months
-     * 
-     * Example endpoint: POST /memberships
-     *
-     * @param membership the Membership entity containing the membershipType
-     * @return the created Membership object (with computed start and expiry dates)
-     * @throws StudentException if creation fails.
-     */
+
+    // POST: Add new membership
     @PostMapping
-    public Membership addMembership(@RequestBody Membership membership) throws StudentException {
+    public ResponseEntity<?> addMembership(@RequestBody @Valid  MembershipDTO membershipDTO) {
         try {
             LocalDate currentDate = LocalDate.now();
-            Date startDate = Date.valueOf(currentDate);
-            int expiryMonths;
-            String membershipType = membership.getMembershipType();
-            
-            if ("Standard".equalsIgnoreCase(membershipType)) {
-                expiryMonths = 3;
-            } else if ("Premium".equalsIgnoreCase(membershipType)) {
-                expiryMonths = 6;
-            } else if ("Platinum".equalsIgnoreCase(membershipType)) {
-                expiryMonths = 12;
-            } else {
-                throw new StudentException("Invalid membership type: " + membershipType);
-            }
-            
-            LocalDate expiryLocalDate = currentDate.plusMonths(expiryMonths);
-            Date expiryDate = Date.valueOf(expiryLocalDate);
-            
-            membership.setStartDate(startDate);
-            membership.setExpiryDate(expiryDate);
-            
-            int membershipId = membershipService.addMembership(membership);
-            membership.setMembershipId(membershipId);
+            membershipDTO.setStartDate(Date.valueOf(currentDate));
+
+            int expiryMonths = switch (membershipDTO.getMembershipType().toLowerCase()) {
+                case "standard" -> 3;
+                case "premium" -> 6;
+                case "platinum" -> 12;
+                default -> throw new StudentException("Invalid membership type: " + membershipDTO.getMembershipType());
+            };
+
+            membershipDTO.setExpiryDate(Date.valueOf(currentDate.plusMonths(expiryMonths)));
+
+            int membershipId = membershipService.addMembership(membershipDTO);
+            membershipDTO.setMembershipId(membershipId);
+
             logger.info("Membership added successfully with ID: {}", membershipId);
-            return membership;
+            return ResponseEntity.status(HttpStatus.CREATED).body(membershipDTO);
         } catch (StudentException se) {
             logger.error("Error adding membership: {}", se.getMessage(), se);
-            throw se;
+            return ResponseEntity.badRequest().body("Error: " + se.getMessage());
+        } catch (Exception se) {
+            logger.error("Unexpected error while adding membership", se);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Unexpected error: " + se.getMessage());
         }
     }
-    
-    /**
-     * Retrieves all membership records.
-     * 
-     * Example endpoint: GET /memberships
-     *
-     * @return a list of Membership entities
-     * @throws StudentException if retrieval fails.
-     */
+
+    // GET: All memberships
     @GetMapping
-    public List<Membership> getAllMemberships() throws StudentException {
-        return membershipService.getAllMemberships();
+    public ResponseEntity<?> getAllMemberships() {
+        try {
+            List<MembershipDTO> memberships = membershipService.getAllMemberships();
+            return ResponseEntity.ok(memberships);
+        } catch (StudentException se) {
+            logger.error("Error retrieving memberships", se);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error: " + se.getMessage());
+        }
     }
-    
-    /**
-     * Retrieves a membership by its ID.
-     * 
-     * Example endpoint: GET /memberships/{membershipId}
-     *
-     * @param membershipId the membership ID
-     * @return the corresponding Membership entity
-     * @throws StudentException if retrieval fails.
-     */
+
+    // GET: Membership by ID
     @GetMapping("/{membershipId}")
-    public Membership getMembershipById(@PathVariable("membershipId") int membershipId) throws StudentException {
-        Membership membership = membershipService.getMembershipByMembershipId(membershipId);
-        if (membership == null) {
-            throw new StudentException("Membership not found with ID: " + membershipId);
+    public ResponseEntity<?> getMembershipById(@PathVariable("membershipId") int membershipId) {
+        try {
+            MembershipDTO membershipDTO = membershipService.getMembershipById(membershipId);
+            if (membershipDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Membership not found with ID: " + membershipId);
+            }
+            return ResponseEntity.ok(membershipDTO);
+        } catch (StudentException se) {
+            logger.error("Error retrieving membership {}", membershipId, se);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error: " + se.getMessage());
         }
-        return membership;
     }
-    
-    /**
-     * Updates an existing membership.
-     *
-     * Only the membershipType can be updated; start and expiry dates remain unchanged.
-     * 
-     * Example endpoint: PUT /memberships/{membershipId}
-     *
-     * @param membershipId the membership ID
-     * @param membership the Membership entity with updated details (membershipType)
-     * @return the updated Membership entity
-     * @throws StudentException if update fails.
-     */
+
+    // PUT: Update membership
     @PutMapping("/{membershipId}")
-    public Membership updateMembership(@PathVariable("membershipId") int membershipId, @RequestBody Membership membership) throws StudentException {
-        Membership existing = membershipService.getMembershipByMembershipId(membershipId);
-        if (existing == null) {
-            throw new StudentException("Membership not found with ID: " + membershipId);
+    public ResponseEntity<?> updateMembership(@PathVariable("membershipId") int membershipId,
+                                              @RequestBody @Valid MembershipDTO membershipDTO) {
+        try {
+            MembershipDTO existing = membershipService.getMembershipById(membershipId);
+            if (existing == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Membership not found with ID: " + membershipId);
+            }
+
+            membershipDTO.setMembershipId(membershipId);
+            membershipDTO.setStartDate(existing.getStartDate());
+            membershipDTO.setExpiryDate(existing.getExpiryDate());
+
+            membershipService.updateMembership(membershipDTO);
+            logger.info("Membership updated successfully for ID: {}", membershipId);
+            return ResponseEntity.ok(membershipDTO);
+        } catch (StudentException se) {
+            logger.error("Error updating membership {}", membershipId, se);
+            return ResponseEntity.badRequest().body("Error: " + se.getMessage());
         }
-        existing.setMembershipType(membership.getMembershipType());
-        membershipService.updateMembership(existing);
-        logger.info("Membership updated successfully for ID: {}", membershipId);
-        return existing;
     }
-    
-    /**
-     * Deletes a membership by its ID.
-     * 
-     * Example endpoint: DELETE /memberships/{membershipId}
-     *
-     * @param membershipId the membership ID
-     * @return a confirmation message.
-     * @throws StudentException if deletion fails.
-     */
+
+    // DELETE: Delete membership
     @DeleteMapping("/{membershipId}")
-    public String deleteMembership(@PathVariable("membershipId") int membershipId) throws StudentException {
-        membershipService.deleteMembership(membershipId);
-        logger.info("Membership deleted successfully for ID: {}", membershipId);
-        return "Membership deleted successfully";
+    public ResponseEntity<?> deleteMembership(@PathVariable("membershipId") int membershipId) {
+        try {
+            membershipService.deleteMembership(membershipId);
+            logger.info("Membership deleted successfully for ID: {}", membershipId);
+            return ResponseEntity.ok("Membership deleted successfully");
+        } catch (StudentException se) {
+            logger.error("Error deleting membership {}", membershipId, se);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Error: " + se.getMessage());
+        }
     }
 }
+
 
 
 

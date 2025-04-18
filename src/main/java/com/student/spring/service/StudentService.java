@@ -2,7 +2,7 @@ package com.student.spring.service;
 
 import java.util.List;
 
-import com.student.spring.entity.Student;
+import com.student.spring.dto.StudentDTO;
 import com.student.spring.exception.StudentException;
 
 /**
@@ -12,11 +12,11 @@ public interface StudentService {
     /**
      * Registers a new student by saving the Student entity.
      *
-     * @param student the Student entity to be saved.
+     * @param studentDTO the Student DTO that is mapped to the Student entity to be saved.
      * @return the generated student ID.
      * @throws StudentException if registration fails.
      */
-    int registerStudent(Student student) throws StudentException;
+    int registerStudent(StudentDTO studentDTO) throws StudentException;
     
     /**
      * Retrieves all student records.
@@ -24,16 +24,16 @@ public interface StudentService {
      * @return a list of Student entities.
      * @throws StudentException if retrieval fails.
      */
-    List<Student> getAllStudents() throws StudentException;
+    List<StudentDTO> getAllStudents() throws StudentException;
     
     /**
      * Retrieves a student by their ID.
      *
      * @param studentId the student ID.
-     * @return the Student entity, or null if not found.
+     * @return the Student DTO, or null if not found.
      * @throws StudentException if retrieval fails.
      */
-    Student getStudentById(int studentId) throws StudentException;
+    StudentDTO getStudentById(int studentId) throws StudentException;
     
     /**
      * Checks if a student exists with the given ID.
@@ -50,7 +50,7 @@ public interface StudentService {
      * @param student the Student entity with updated details.
      * @throws StudentException if an error occurs during update.
      */
-    void updateStudent(Student student) throws StudentException;
+    void updateStudent(StudentDTO studentDTO) throws StudentException;
     
     /**
      * Deletes a student record based on the student ID.

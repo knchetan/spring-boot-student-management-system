@@ -2,97 +2,78 @@ package com.student.spring.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 
-import com.student.spring.entity.Activity;
+import com.student.spring.dto.ActivityDTO;
 import com.student.spring.exception.StudentException;
 import com.student.spring.service.ActivityService;
 
-/**
- * REST Controller for managing Activity entities.
- *
- * Exposes endpoints to add, retrieve, update, and delete activities.
- * The controller relies on the ActivityService for business logic.
- */
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/activities")
 public class ActivityController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ActivityController.class);
+
     @Autowired
     private ActivityService activityService;
-    
-    /**
-     * Creates a new Activity.
-     * 
-     * Example endpoint: POST /activities
-     * The Activity data is provided in the request body as JSON.
-     *
-     * @param activity the Activity object to create.
-     * @return the created Activity (with the generated ID).
-     * @throws StudentException if creation fails.
-     */
+
+    // POST: Add new activity
     @PostMapping
-    public Activity addActivity(@RequestBody Activity activity) throws StudentException {
-        int activityId = activityService.addActivity(activity);
-        activity.setActivityId(activityId);
-        return activity;
+    public ResponseEntity<?> addActivity(@RequestBody @Valid ActivityDTO activityDTO) {
+        try {
+            int activityId = activityService.addActivity(activityDTO);
+            activityDTO.setActivityId(activityId);
+            return new ResponseEntity<>(activityDTO, HttpStatus.CREATED);
+        } catch (StudentException se) {
+            logger.error("Error adding activity", se);
+            return new ResponseEntity<>("Error: " + se.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
-    
-    /**
-     * Retrieves all Activity records.
-     * 
-     * Example endpoint: GET /activities
-     *
-     * @return a list of Activity objects.
-     * @throws StudentException if retrieval fails.
-     */
+
+    // GET: Get all activities
     @GetMapping
-    public List<Activity> getAllActivities() throws StudentException {
-        return activityService.getAllActivities();
+    public ResponseEntity<?> getAllActivities() {
+        try {
+            List<ActivityDTO> list = activityService.getAllActivities();
+            return new ResponseEntity<>(list, HttpStatus.OK);
+        } catch (StudentException se) {
+            logger.error("Error retrieving activities", se);
+            return new ResponseEntity<>("Error: " + se.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
-    
-    /**
-     * Updates an existing Activity.
-     * 
-     * Example endpoint: PUT /activities/{activityId}
-     * The updated Activity data is provided in the request body.
-     *
-     * @param activityId the ID of the Activity to update.
-     * @param activity the Activity object with updated details.
-     * @return the updated Activity object.
-     * @throws StudentException if update fails.
-     */
+
+    // PUT: Update activity
     @PutMapping("/{activityId}")
-    public Activity updateActivity(@PathVariable int activityId, @RequestBody Activity activity) throws StudentException {
-        activity.setActivityId(activityId);
-        activityService.updateActivity(activity);
-        return activity;
+    public ResponseEntity<?> updateActivity(@PathVariable int activityId, @RequestBody @Valid ActivityDTO activityDTO) {
+        try {
+            activityDTO.setActivityId(activityId);
+            activityService.updateActivity(activityDTO);
+            return new ResponseEntity<>(activityDTO, HttpStatus.OK);
+        } catch (StudentException se) {
+            logger.error("Error in updating activity", se);
+            return new ResponseEntity<>("Error: " + se.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
-    
-    /**
-     * Deletes an Activity record.
-     * 
-     * Example endpoint: DELETE /activities/{activityId}
-     *
-     * @param activityId the ID of the Activity to delete.
-     * @return a confirmation message.
-     * @throws StudentException if deletion fails.
-     */
+
+    // DELETE: Delete activity
     @DeleteMapping("/{activityId}")
-    public String deleteActivity(@PathVariable int activityId) throws StudentException {
-        activityService.deleteActivity(activityId);
-        return "Activity deleted successfully.";
+    public ResponseEntity<?> deleteActivity(@PathVariable int activityId) {
+        try {
+            activityService.deleteActivity(activityId);
+            return new ResponseEntity<>("Activity deleted successfully.", HttpStatus.OK);
+        } catch (StudentException se) {
+            logger.error("Error in deleting activity", se);
+            return new ResponseEntity<>("Error: " + se.getMessage(), HttpStatus.NOT_FOUND);
+        }
     }
 }
+
 
 
 

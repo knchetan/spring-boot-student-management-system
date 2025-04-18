@@ -3,6 +3,7 @@ package com.student.spring.entity;
 import java.sql.Date;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -58,6 +59,7 @@ public class Student{
         private String address;
 
         @Column(name = "dob", nullable = false)
+        @JsonFormat(pattern = "yyyy-MM-dd")
         private Date dob;
 
         // One-to-One association to Membership (exclusive to a student)
