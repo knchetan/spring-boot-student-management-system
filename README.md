@@ -1,16 +1,16 @@
 # Student Management System
 
 ## Overview
-This project is a Spring Boot–based Student Management System that demonstrates a layered architecture using Spring Boot, Spring Data JPA, Spring Security (JWT-based), and a MySQL backend. The application allows you to manage students, grades, memberships, and activities. It now includes secure login with token-based authentication and robust validation.
+This project is a Spring Boot–based Student Management System that demonstrates a layered architecture using Spring Boot, Spring Data JPA, Spring Security (JWT-based), and a MySQL backend. The application allows you to manage students, grades, memberships, and activities. It also includes secure login with token-based authentication and robust validation.
 
 ## Features
 - **Student Management:** Register, view, update, and delete student records.
 - **Grade Management:** Manage student grades and standards.
 - **Membership Management:** Handle one-to-one student membership details.
-- **Activity Management:** Manage many-to-many associations between students and activities. Duplicate activities are now restricted based on custom logic.
+- **Activity Management:** Manage many-to-many associations between students and activities.
 - **Spring Security with JWT:** Secure endpoints with token-based authentication. Only authenticated users can access protected routes.
 - **Role-based Authentication:** Users have roles (e.g., `ROLE_ADMIN`) stored in the database.
-- **Validation:** DTO-based validation with custom rules for fields and logic (e.g., preventing repeated activities).
+- **Validation:** DTO-based validation with custom rules for fields and logic.
 - **Logging:** Uses SLF4J with Logback for detailed request and error logging.
 
 ## Technologies Used
@@ -31,9 +31,9 @@ This project is a Spring Boot–based Student Management System that demonstrate
 1. **Database Configuration:**  
    Update `src/main/resources/application.properties` with your MySQL connection details:
    ```properties
-   spring.datasource.url=jdbc:mysql://localhost:3306/your_database_name?useSSL=false&serverTimezone=UTC
-   spring.datasource.username=your_username
-   spring.datasource.password=your_password
+   spring.datasource.url=jdbc:mysql://localhost:3306/student_spring?useSSL=false&serverTimezone=UTC
+   spring.datasource.username=root
+   spring.datasource.password=####
    spring.jpa.hibernate.ddl-auto=update
    spring.jpa.show-sql=true
    spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
@@ -58,7 +58,6 @@ This project is a Spring Boot–based Student Management System that demonstrate
 ## Validation Highlights
 - Field-level validation using annotations (e.g., `@NotBlank`, `@Email`, `@Pattern`)
 - Nested DTO validations (e.g., validating membership inside student)
-- Custom activity validation: prevents saving activities with duplicate names or duplicate type suffixes for the same activity name
 
 ## Logging
 - Errors and successful operations are logged using SLF4J with appropriate log levels.
