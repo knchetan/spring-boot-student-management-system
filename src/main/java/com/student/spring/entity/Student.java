@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -77,5 +78,5 @@ public class Student{
         @JoinTable(name = "student_activity",
                 joinColumns = @JoinColumn(name = "student_id"),
                 inverseJoinColumns = @JoinColumn(name = "activity_id"))
-	private Set<Activity> activity;              
+	private Set<Activity> activities;              
 }

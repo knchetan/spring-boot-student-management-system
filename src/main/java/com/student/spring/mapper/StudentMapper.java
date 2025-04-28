@@ -1,12 +1,12 @@
 package com.student.spring.mapper;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.student.spring.dto.ActivityDTO;
 import com.student.spring.dto.StudentDTO;
 import com.student.spring.entity.Activity;
 import com.student.spring.entity.Student;
-
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class StudentMapper {
 
@@ -24,7 +24,7 @@ public class StudentMapper {
         dto.setDob(student.getDob());
         dto.setMembership(MembershipMapper.toDTO(student.getMembership()));
         dto.setGrade(GradeMapper.toDTO(student.getGrade()));
-        dto.setActivities(toDTOSet(student.getActivity()));
+        dto.setActivities(toDTOSet(student.getActivities()));
         return dto;
     }
 
@@ -42,7 +42,7 @@ public class StudentMapper {
         student.setDob(dto.getDob());
         student.setMembership(MembershipMapper.toEntity(dto.getMembership()));
         student.setGrade(GradeMapper.toEntity(dto.getGrade()));
-        student.setActivity(toEntitySet(dto.getActivities()));
+        student.setActivities(toEntitySet(dto.getActivities()));
         return student;
     }
 

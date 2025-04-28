@@ -1,12 +1,24 @@
 package com.student.spring.controller;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.student.spring.dto.GradeDTO;
 import com.student.spring.exception.StudentException;
@@ -18,6 +30,7 @@ import jakarta.validation.Valid;
 /**
  * REST Controller for managing Grade entities using DTOs.
  */
+@PreAuthorize("hasRole('ADMIN')")
 @RestController
 @RequestMapping("/grades")
 public class GradeController {
@@ -30,24 +43,39 @@ public class GradeController {
     @Autowired
     private StudentService studentService;
 
-    // POST: Add Grade
+    @Autowired
+    private MessageSource messageSource;
+
+    /**
+     * POST /grades - Adds a new grade to a student.
+     *
+     * @param gradeDTO the grade details
+     * @param studentId the ID of the student
+     * @return a success message or error response
+     */
     @PostMapping
     public ResponseEntity<?> addGrade(@RequestBody @Valid GradeDTO gradeDTO, @RequestParam int studentId) {
         try {
             if (!studentService.isStudentExists(studentId)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Student not found with ID: " + studentId);
+                String msg = messageSource.getMessage("grade.studentnotfound", new Object[]{studentId}, Locale.getDefault());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
             }
             int gradeId = gradeService.addGrade(gradeDTO);
             gradeDTO.setGradeId(gradeId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(gradeDTO);
+            String msg = messageSource.getMessage("grade.created", null, Locale.getDefault());
+            return ResponseEntity.status(HttpStatus.CREATED).body(msg);
         } catch (StudentException se) {
             logger.error("Error adding grade", se);
-            return ResponseEntity.badRequest().body("Error: " + se.getMessage());
+            String msg = messageSource.getMessage("error.internal", null, Locale.getDefault());
+            return ResponseEntity.badRequest().body(msg);
         }
     }
 
-    // GET: All Grades
+    /**
+     * GET /grades - Retrieves all grades.
+     *
+     * @return list of GradeDTOs or an error message
+     */
     @GetMapping
     public ResponseEntity<?> getAllGrades() {
         try {
@@ -55,12 +83,17 @@ public class GradeController {
             return ResponseEntity.ok(grades);
         } catch (StudentException se) {
             logger.error("Error retrieving grades", se);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error: " + se.getMessage());
+            String msg = messageSource.getMessage("error.internal", null, Locale.getDefault());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(msg);
         }
     }
 
-    // GET: Grades by student
+    /**
+     * GET /grades/byStudent/{studentId} - Retrieves grades for a specific student.
+     *
+     * @param studentId the ID of the student
+     * @return list of grades or an error message
+     */
     @GetMapping("/byStudent/{studentId}")
     public ResponseEntity<?> getGradesByStudentId(@PathVariable int studentId) {
         try {
@@ -68,37 +101,52 @@ public class GradeController {
             return ResponseEntity.ok(grades);
         } catch (StudentException se) {
             logger.error("Error retrieving grades for student {}", studentId, se);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Error: " + se.getMessage());
+            String msg = messageSource.getMessage("grade.notfound", new Object[]{studentId}, Locale.getDefault());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
         }
     }
 
-    // PUT: Update grade
+    /**
+     * PUT /grades/{gradeId} - Updates an existing grade.
+     *
+     * @param gradeId the ID of the grade to update
+     * @param gradeDTO the updated grade details
+     * @return the updated grade or an error message
+     */
     @PutMapping("/{gradeId}")
     public ResponseEntity<?> updateGrade(@PathVariable int gradeId, @RequestBody @Valid GradeDTO gradeDTO) {
         try {
             gradeDTO.setGradeId(gradeId);
             gradeService.updateGrade(gradeDTO);
-            return ResponseEntity.ok(gradeDTO);
+            String msg = messageSource.getMessage("grade.updated", null, Locale.getDefault());
+            return ResponseEntity.ok(msg);
         } catch (StudentException se) {
             logger.error("Error updating grade", se);
-            return ResponseEntity.badRequest().body("Error: " + se.getMessage());
+            String msg = messageSource.getMessage("error.internal", null, Locale.getDefault());
+            return ResponseEntity.badRequest().body(msg);
         }
     }
 
-    // DELETE: Delete grade
+    /**
+     * DELETE /grades/{gradeId} - Deletes a grade by ID.
+     *
+     * @param gradeId the ID of the grade to delete
+     * @return a success message or error message
+     */
     @DeleteMapping("/{gradeId}")
     public ResponseEntity<?> deleteGrade(@PathVariable int gradeId) {
         try {
             gradeService.deleteGrade(gradeId);
-            return ResponseEntity.ok("Grade deleted successfully");
+            String msg = messageSource.getMessage("grade.deleted", null, Locale.getDefault());
+            return ResponseEntity.ok(msg);
         } catch (StudentException se) {
             logger.error("Error deleting grade", se);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Error: " + se.getMessage());
+            String msg = messageSource.getMessage("grade.notfound", new Object[]{gradeId}, Locale.getDefault());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
         }
     }
 }
+
 
 
 

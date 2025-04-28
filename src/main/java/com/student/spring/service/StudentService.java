@@ -1,8 +1,8 @@
 package com.student.spring.service;
 
 import java.util.List;
-
 import com.student.spring.dto.StudentDTO;
+import com.student.spring.dto.StudentInputDTO;
 import com.student.spring.exception.StudentException;
 
 /**
@@ -59,4 +59,8 @@ public interface StudentService {
      * @throws StudentException if an error occurs during deletion.
      */
     void deleteStudent(int studentId) throws StudentException;
+
+    public StudentDTO registerStudentFromInput(StudentInputDTO studentInputDTO) throws StudentException;
+
+    public StudentDTO updateStudentFromInput(int studentId, StudentInputDTO studentInputDTO) throws StudentException;
 }

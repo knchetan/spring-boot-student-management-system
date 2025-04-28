@@ -1,7 +1,6 @@
 package com.student.spring.entity;
 
 import java.util.Set;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

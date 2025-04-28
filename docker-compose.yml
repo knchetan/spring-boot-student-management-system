@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8
+    container_name: student-mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: "#system@1234"
+      MYSQL_DATABASE: student_spring
+    ports:
+      - "3307:3306"
+    networks:
+      - springnet
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  app:
+    build: .
+    container_name: student-app
+    restart: on-failure
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+    networks:
+      - springnet
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/student_spring?allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: "#system@1234"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+volumes:
+  mysql_data:
+
+networks:
+  springnet:

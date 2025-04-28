@@ -5,8 +5,17 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.student.spring.dto.ActivityDTO;
 import com.student.spring.exception.StudentException;
@@ -14,6 +23,16 @@ import com.student.spring.service.ActivityService;
 
 import jakarta.validation.Valid;
 
+/**
+ * REST Controller for managing activity-related operations.
+ * 
+ * This controller provides endpoints for creating, retrieving, updating, 
+ * and deleting activities in the system. All endpoints are protected and 
+ * require the caller to have the 'ADMIN' role.
+ * 
+ * Access Control: Only users with ROLE_ADMIN can access these endpoints.</p>
+ */
+@PreAuthorize("hasRole('ADMIN')")
 @RestController
 @RequestMapping("/activities")
 public class ActivityController {
@@ -23,7 +42,13 @@ public class ActivityController {
     @Autowired
     private ActivityService activityService;
 
-    // POST: Add new activity
+    /**
+     * POST /activities - Creates a new activity.
+     *
+     * @param activityDTO the activity data to be added
+     * @return the created ActivityDTO and HTTP 201 status if successful,
+     *         otherwise an error message with HTTP 400 status
+     */
     @PostMapping
     public ResponseEntity<?> addActivity(@RequestBody @Valid ActivityDTO activityDTO) {
         try {
@@ -36,7 +61,12 @@ public class ActivityController {
         }
     }
 
-    // GET: Get all activities
+    /**
+     * GET /activities - Retrieves all activities.
+     *
+     * @return a list of ActivityDTOs and HTTP 200 status if successful,
+     *         otherwise an error message with HTTP 500 status
+     */
     @GetMapping
     public ResponseEntity<?> getAllActivities() {
         try {
@@ -48,7 +78,14 @@ public class ActivityController {
         }
     }
 
-    // PUT: Update activity
+    /**
+     * PUT /activities/{activityId} - Updates an existing activity.
+     *
+     * @param activityId the ID of the activity to update
+     * @param activityDTO the updated activity data
+     * @return the updated ActivityDTO and HTTP 200 status if successful,
+     *         otherwise an error message with HTTP 400 status
+     */
     @PutMapping("/{activityId}")
     public ResponseEntity<?> updateActivity(@PathVariable int activityId, @RequestBody @Valid ActivityDTO activityDTO) {
         try {
@@ -61,7 +98,13 @@ public class ActivityController {
         }
     }
 
-    // DELETE: Delete activity
+    /**
+     * DELETE /activities/{activityId} - Deletes an activity by ID.
+     *
+     * @param activityId the ID of the activity to delete
+     * @return a success message and HTTP 200 status if deleted,
+     *         otherwise an error message with HTTP 404 status
+     */
     @DeleteMapping("/{activityId}")
     public ResponseEntity<?> deleteActivity(@PathVariable int activityId) {
         try {
@@ -73,6 +116,7 @@ public class ActivityController {
         }
     }
 }
+
 
 
 

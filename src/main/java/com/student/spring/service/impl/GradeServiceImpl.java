@@ -14,15 +14,29 @@ import com.student.spring.mapper.GradeMapper;
 import com.student.spring.repository.GradeRepository;
 import com.student.spring.service.GradeService;
 
+/**
+ * Service implementation class for managing grade-related operations.
+ *
+ * This service handles the core business logic for creating, retrieving,
+ * updating, and deleting grade records. It also supports fetching grades
+ * associated with a specific student.
+ */
 @Service
 @Transactional
 public class GradeServiceImpl implements GradeService {
 
     private static final Logger logger = LoggerFactory.getLogger(GradeServiceImpl.class);
-    
+
     @Autowired
     private GradeRepository gradeRepository;
-    
+
+    /**
+     * Adds a new grade.
+     *
+     * @param gradeDTO the grade data to be added
+     * @return the ID of the newly created grade
+     * @throws StudentException if the grade cannot be added
+     */
     @Override
     public int addGrade(GradeDTO gradeDTO) throws StudentException {
         try {
@@ -30,11 +44,18 @@ public class GradeServiceImpl implements GradeService {
             Grade updatedGrade = gradeRepository.save(grade);
             return updatedGrade.getGradeId();
         } catch (Exception se) {
-            logger.error("Error in adding student grade"+ se);
+            logger.error("Error in adding student grade", se);
             throw new StudentException("Error in adding student grade: " + se.getMessage());
         }
     }
-    
+
+    /**
+     * Retrieves all grades associated with a specific student.
+     *
+     * @param studentId the student ID to filter grades
+     * @return a list of GradeDTOs associated with the student
+     * @throws StudentException if grades cannot be retrieved
+     */
     @Override
     public List<GradeDTO> getGradesByStudentId(int studentId) throws StudentException {
         try {
@@ -43,11 +64,17 @@ public class GradeServiceImpl implements GradeService {
                          .map(GradeMapper::toDTO)
                          .collect(Collectors.toList());
         } catch (Exception se) {
-            logger.error("Error in fetching student grade"+ se);
+            logger.error("Error in fetching student grade", se);
             throw new StudentException("Error in fetching student grade: " + se.getMessage());
         }
     }
-    
+
+    /**
+     * Retrieves all grades in the system.
+     *
+     * @return a list of all GradeDTOs
+     * @throws StudentException if grades cannot be retrieved
+     */
     @Override
     public List<GradeDTO> getAllGrades() throws StudentException {
         try {
@@ -56,32 +83,45 @@ public class GradeServiceImpl implements GradeService {
                          .map(GradeMapper::toDTO)
                          .collect(Collectors.toList());
         } catch (Exception se) {
-            logger.error("Error in fetching all grades"+ se);
+            logger.error("Error in fetching all grades", se);
             throw new StudentException("Error in fetching all grades: " + se.getMessage());
         }
     }
-    
+
+    /**
+     * Updates an existing grade.
+     *
+     * @param gradeDTO the updated grade data
+     * @throws StudentException if the grade cannot be updated
+     */
     @Override
     public void updateGrade(GradeDTO gradeDTO) throws StudentException {
         try {
             Grade grade = GradeMapper.toEntity(gradeDTO);
             gradeRepository.save(grade);
         } catch (Exception se) {
-            logger.error("Error in updating student grade"+ se);
+            logger.error("Error in updating student grade", se);
             throw new StudentException("Error in updating student grade: " + se.getMessage());
         }
     }
-    
+
+    /**
+     * Deletes a grade by its ID.
+     *
+     * @param gradeId the ID of the grade to delete
+     * @throws StudentException if the grade cannot be deleted
+     */
     @Override
     public void deleteGrade(int gradeId) throws StudentException {
         try {
             gradeRepository.deleteById(gradeId);
         } catch (Exception se) {
-            logger.error("Error in deleting student grade"+ se);
+            logger.error("Error in deleting student grade", se);
             throw new StudentException("Error in deleting student grade: " + se.getMessage());
         }
     }
 }
+
 
 
 

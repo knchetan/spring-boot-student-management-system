@@ -1,6 +1,7 @@
 package com.student.spring.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,9 +12,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ActivityDTO {
-    private Integer activityId;
+    private int activityId;
 
-    @NotBlank(message = "Activity name is required")
+    @NotNull(message = "Activity name is required")
     private String activityName;
     
     @NotBlank(message = "Activity type is required")

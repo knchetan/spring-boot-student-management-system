@@ -1,7 +1,6 @@
 package com.student.spring.service;
 
 import java.util.List;
-
 import com.student.spring.dto.ActivityDTO;
 import com.student.spring.exception.StudentException;
 

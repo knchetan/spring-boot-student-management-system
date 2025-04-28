@@ -2,12 +2,10 @@ package com.student.spring.service.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.student.spring.dto.ActivityDTO;
 import com.student.spring.entity.Activity;
 import com.student.spring.exception.StudentException;
@@ -15,24 +13,43 @@ import com.student.spring.mapper.ActivityMapper;
 import com.student.spring.repository.ActivityRepository;
 import com.student.spring.service.ActivityService;
 
+/**
+ * Service implementation class for managing activity-related operations.
+ *
+ * This class handles business logic for adding, retrieving, updating,
+ * and deleting activity records. It also includes validation logic for preventing
+ * duplicate activity names or type suffixes.
+ */
 @Service
 public class ActivityServiceImpl implements ActivityService {
 
     private static final Logger logger = LoggerFactory.getLogger(ActivityServiceImpl.class);
-    
+
     @Autowired
     private ActivityRepository activityRepository;
-    
+
+    /**
+     * Adds a new activity after validating for duplicates.
+     *
+     * @param activityDTO the activity data to be added
+     * @return the ID of the newly created activity
+     * @throws StudentException if the activity is a duplicate or saving fails
+     */
     @Override
     public int addActivity(ActivityDTO activityDTO) throws StudentException {
         validateDuplicateActivity(activityDTO, false);
-    
+
         Activity activity = ActivityMapper.toEntity(activityDTO);
-        Activity saved = activityRepository.save(activity);
-        return saved.getActivityId();
+        Activity newActivity = activityRepository.save(activity);
+        return newActivity.getActivityId();
     }
-    
-    
+
+    /**
+     * Retrieves all activities from the database.
+     *
+     * @return a list of ActivityDTOs
+     * @throws StudentException if retrieval fails
+     */
     @Override
     public List<ActivityDTO> getAllActivities() throws StudentException {
         try {
@@ -41,29 +58,48 @@ public class ActivityServiceImpl implements ActivityService {
                              .map(ActivityMapper::toDTO)
                              .collect(Collectors.toList());
         } catch (Exception se) {
-            logger.error("Error fetching activities: {}"+ se.getMessage()+ se);
+            logger.error("Error fetching activities: {}", se.getMessage(), se);
             throw new StudentException("Error fetching activities: " + se.getMessage());
         }
     }
-    
+
+    /**
+     * Updates an existing activity after validating for duplication.
+     *
+     * @param activityDTO the activity data to update
+     * @throws StudentException if validation fails or update fails
+     */
     @Override
     public void updateActivity(ActivityDTO activityDTO) throws StudentException {
         validateDuplicateActivity(activityDTO, true);
-    
+
         Activity activity = ActivityMapper.toEntity(activityDTO);
         activityRepository.save(activity);
     }
-    
+
+    /**
+     * Deletes an activity by its ID.
+     *
+     * @param activityId the ID of the activity to delete
+     * @throws StudentException if the delete operation fails
+     */
     @Override
     public void deleteActivity(int activityId) throws StudentException {
         try {
             activityRepository.deleteById(activityId);
         } catch (Exception se) {
-            logger.error("Error deleting activity: {}"+ se.getMessage()+ se);
+            logger.error("Error deleting activity: {}", se.getMessage(), se);
             throw new StudentException("Error deleting activity: " + se.getMessage());
         }
     }
-    
+
+    /**
+     * Retrieves all activities associated with a given student ID.
+     *
+     * @param studentId the ID of the student
+     * @return a list of ActivityDTOs associated with the student
+     * @throws StudentException if retrieval fails
+     */
     @Override
     public List<ActivityDTO> getActivitiesByStudentId(int studentId) throws StudentException {
         try {
@@ -72,7 +108,7 @@ public class ActivityServiceImpl implements ActivityService {
                              .map(ActivityMapper::toDTO)
                              .collect(Collectors.toList());
         } catch (Exception se) {
-            logger.error("Error retrieving activities for student ID {}: {}", studentId+ se.getMessage()+ se);
+            logger.error("Error retrieving activities for student ID {}: {}", studentId, se.getMessage(), se);
             throw new StudentException("Error retrieving activities for student ID " + studentId + ": " + se.getMessage());
         }
     }
@@ -105,11 +141,11 @@ public class ActivityServiceImpl implements ActivityService {
     
         List<Activity> existingActivities = activityRepository.findAll();
     
-        for (Activity act : existingActivities) {
-            if (isUpdate && act.getActivityId() == dto.getActivityId()) continue;
+        for (Activity activity : existingActivities) {
+            if (isUpdate && activity.getActivityId() == dto.getActivityId()) continue;
     
-            String existingName = act.getActivityName().trim().toLowerCase();
-            String existingTypeSuffix = extractSuffix(act.getActivityType().trim().toLowerCase());
+            String existingName = activity.getActivityName().trim().toLowerCase();
+            String existingTypeSuffix = extractSuffix(activity.getActivityType().trim().toLowerCase());
     
             if (existingName.equals(newName)) {
                 throw new StudentException("Activity already exists with name: " + newName);
@@ -119,6 +155,5 @@ public class ActivityServiceImpl implements ActivityService {
                 throw new StudentException("Activity with name '" + newName + "' and type suffix '" + newTypeSuffix + "' already exists.");
             }
         }
-    }
-    
+    }    
 }

@@ -5,7 +5,6 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -16,41 +15,41 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Setter
+/**
+ * Input DTO for accepting student details in flat JSON format.
+ * This DTO maps foreign key relationships via IDs.
+ */
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudentDTO {
-    private int studentId;
+public class StudentInputDTO {
 
     @NotBlank(message = "First name is mandatory")
     private String firstName;
 
     @NotBlank(message = "Last name is mandatory")
     private String lastName;
-    
+
     @Pattern(regexp = "\\d{10}", message = "Phone number must be 10 digits")
-    private String phone;
-    
+    private String phoneNo;
+
     @Email(message = "Email should be valid")
     private String email;
-    
+
     @NotBlank(message = "Address is required")
     private String address;
 
     @NotNull(message = "Date of Birth is required")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dob;
-    
-    @Valid
-    @NotNull(message = "Membership is required")
-    private MembershipDTO membership;
-    
-    @Valid
-    @NotNull(message = "Grade is required")
-    private GradeDTO grade;
-    
-    @Valid
-    @NotEmpty(message = "At least one activity is required")
-    private Set<ActivityDTO> activities;
+
+    @NotNull(message = "Grade ID is required")
+    private Integer gradeId;
+
+    @NotNull(message = "Membership ID is required")
+    private Integer membershipId;
+
+    @NotEmpty(message = "At least one activity ID is required")
+    private Set<Integer> activityIds;
 }
